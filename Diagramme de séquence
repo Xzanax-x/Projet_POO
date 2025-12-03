@@ -1,0 +1,33 @@
+Diagramme de séquence en Mermaid
+sequenceDiagram
+    autonumber
+
+    participant Jeu
+    participant Grille
+    participant Regle
+    participant Cellule
+    participant EtatCellule
+
+    %% 1. Le jeu demande l'évolution
+    Jeu->>Grille: mettreAJour(regle)
+
+    loop Pour chaque cellule de la grille
+        %% 2. Comptage des voisines
+        Grille->>Grille: compterVoisinesVivantes(x, y)
+
+        %% 3. Récupération de l'état courant
+        Grille->>Cellule: obtenirEtat()
+        Cellule-->>Grille: étatCourant
+
+        %% 4. Demande du prochain état
+        Grille->>Regle: calculerProchainEtat(étatCourant,\nnbVoisines)
+        Regle->>EtatCellule: prochainEtat(nbVoisines)
+        EtatCellule-->>Regle: nouvelEtat
+        Regle-->>Grille: nouvelEtat
+
+        %% 5. Mise à jour de la cellule
+        Grille->>Cellule: definirEtat(nouvelEtat)
+    end
+
+    %% 6. Fin de l'évolution
+    Grille-->>Jeu: grille mise à jour
