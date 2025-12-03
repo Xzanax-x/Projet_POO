@@ -1,0 +1,172 @@
+// --- Archticture Code --- // 
+
+#include <iostream>
+#include <vector>
+#include <string>
+
+// --- Déclaration anticipée des classes utilisées ---//
+class Regle;
+class Grille;
+class Cellule;
+class RenduGraphique;
+class EtatCellule;
+
+// --- Class EtatCellule qui est l'état de la case ---//
+class EtatCellule {
+public:
+ 
+    virtual ~EtatCellule() {} // Destructeur EtatCellule
+    virtual bool estVivante() = 0; // Pour savoir si la cellule est morte ou non
+    virtual EtatCellule* prochainEtat(int voisinsVivants) = 0; // Pour savoir si la cellule d'à côté est morte ou non
+};
+
+// --- Class EtatVivant qui est l'état de la case en vie ---//
+class EtatVivant : public EtatCellule {
+public:
+    bool estVivante() override { return true; } // On dit que estVivante est true psk c'est vivant
+    EtatCellule* prochainEtat(int voisinsVivants) override; 
+};
+
+// --- Class EtatMort qui est l'état de la case morte ---//
+class EtatMort : public EtatCellule {
+public:
+   
+    bool estVivante() override { return false; } // On dit que estVivante est false psk c'est mort
+    EtatCellule* prochainEtat(int voisinsVivants) override; 
+};
+
+// --- Class des règles du jeu ---//
+class Regle {
+public:
+
+    virtual ~Regle() {} // Destructeur pour pas avoir de problème
+    virtual EtatCellule* calculerProchainEtatCellule(EtatCellule* actuel, int voisinsVivants) = 0;
+};
+
+// --- Class RegleVie qui sont les règles spécifiques du jeu ---//
+class RegleVie : public Regle {
+public:
+    EtatCellule* calculerProchainEtatCellule(EtatCellule* actuel, int voisinsVivants) override; 
+};
+
+
+// --- Class Cellule qui dit ce qui y'a dedans ---//
+class Cellule {
+
+protected:
+  
+    int x;
+    int y;
+    EtatCellule* etat; 
+
+public:
+
+    Cellule(int x, int y, EtatCellule* e) : x(x), y(y), etat(e) {} // Constructeur et initialisation
+    bool estVivante() { return etat->estVivante(); } // Pour savoir si la cellule est en vie ou non
+    void setEtat(EtatCellule* e) { etat = e; } // Pour mettre l'état de la cellule 
+    EtatCellule* getEtat() { return etat; } // Pour prendre l'état de la cellule
+};
+
+class Grille {
+
+private:  
+  
+    int largeur; // Largeur de la grille 
+    int hauteur; // Taille de la grille
+    std::vector<std::vector<Cellule*>> cellules; 
+    
+public:
+    
+    Grille(int l, int h) : largeur(l), hauteur(h) {} // Constructeur qui initialise la taille de la grille 
+    void initialiserDepuisFichier(std::string chemin) {} // Pour remplir et initialiser la grille avec des cellules vivantes ou pas
+    int compterVoisinsVivants(int x, int y) { return 0;} // Pour savoir si la prochaine cellule est dead ou non
+    std::vector<std::vector<Cellule*>>& getCellules() { return cellules; } 
+};
+
+
+
+
+// --- Déclaration anticipée ---//
+struct sf_RenderWindow {};  // Affichage de l'écran 
+
+// --- Class RenduGraphique qui gère l'affichage graphique de la grille et l'interaction avec l'utilisateur avec les événements de fenêtre ---//
+class RenduGraphique {
+private:
+    sf_RenderWindow* fenetre; // Pointeur vers l'objet de fenêtre graphique réel 
+    int tailleCellule;
+
+public:
+    RenduGraphique(int tailleCellule) : tailleCellule(tailleCellule){} // Constructeur qui initialise la taille que prend chaque cellule à l'écran.
+    void rendre(int tailleCellule, Grille* grille) { /* ... */ } // Dessine l'état actuel de la grille donc cellules vivantes ou mortes dans la fenêtre
+    bool sonderEvenements() { return true; } // Vérifie si l'utilisateur a interagi (clic, fermeture de fenêtre) et renvoie true si le jeu doit continuer
+};
+
+
+// --- Class Jeu qui initialise le jeu avec la grille, les règles et tout ça et gère la boucle d'exécution de la simulation. ---//
+class Jeu {
+
+private:
+   
+    Grille* grille; // Pointeur de la grille 
+    Regle* regle; // Pointeur de la règle 
+    int maxIterations; // Variable qui représente le nombre maximum de générations que la simulation doit exécuter avant de s'arrêter
+    RenduGraphique* renduGraphique; // Pointeur de RenduGraphique
+    bool evolutionArretée_val = false; // Variable qui stocke l'état qui indique si la simulation a touché une condition d'arrêt 
+    
+public:
+
+    Jeu(Grille* g, Regle* r, RenduGraphique* rg, int maxIter) : grille(g), regle(r), renduGraphique(rg), maxIterations(maxIter) {} // Constructeur de jeu qui initialise tout 
+    void executerModeConsole() { /* ... */ } // Affichage dans le terminal
+    void executerModeGraphique() { /* ... */ } // Démarre le jeu et gère l'affichage dans la fenêtre graphique
+    bool estEvolutionArretée() { return evolutionArretée_val; }// Vérifie si l'état de la grille
+
+};
+
+
+//--- Méthodes qu'on va utiliser ---//
+
+// --- Méthode EtatVivant --- //
+EtatCellule* EtatVivant::prochainEtat(int voisinsVivants) {
+    // Implémentation ici
+    if (voisinsVivants == 2 || voisinsVivants == 3) {
+        return this; // Survie
+    } else {
+        return new EtatMort(); // Meurt (sous-population ou surpopulation)
+    }
+}
+
+// --- Méthode EtatMort --- //
+EtatCellule* EtatMort::prochainEtat(int voisinsVivants) {
+    // Implémentation ici
+    if (voisinsVivants == 3) {
+        return new EtatVivant(); // Repopulation
+    } else {
+        return this; // Reste mort
+    }
+}
+
+// --- Méthode pour les cellules voisines --- //
+EtatCellule* RegleVie::calculerProchainEtatCellule(EtatCellule* actuel, int voisinsVivants) {
+    // La règle délègue le calcul à l'état actuel de la cellule
+    return actuel->prochainEtat(voisinsVivants);
+}
+
+
+// --- Main --- //
+int main() {
+
+    //--- Initialisation de la grille et des règles et du jeu --- //
+    RegleVie* regle = new RegleVie();
+    Grille* grille = new Grille(10, 10);
+    // Supposons une taille de cellule par défaut pour le constructeur
+    RenduGraphique* rendu = new RenduGraphique(16); 
+    
+    Jeu jeu(grille, regle, rendu, 1000);
+    
+    jeu.executerModeConsole();
+
+    delete regle;
+    // La gestion de la mémoire pour grille et rendu (et les cellules/états) doit être complétée.
+
+    return 0;
+}
