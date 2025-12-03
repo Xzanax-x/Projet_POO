@@ -76,12 +76,14 @@ lignes comportant des 0 et des 1
 
 Motif oscillateur “Blinker”:
 
-5 5
-1 1 1 1 1
-1 0 0 0 1
-1 0 1 0 1
-1 0 0 0 1
-1 1 1 1 1
+7 7
+0 0 0 1 0 0 0
+0 0 1 1 1 0 0
+0 1 1 1 1 1 0
+1 1 1 1 1 1 1
+0 1 1 1 1 1 0
+0 0 1 1 1 0 0
+0 0 0 1 0 0 0
 
 
 Dans ce format :
@@ -125,7 +127,7 @@ Les cellules vivantes sont affichées visuellement, tandis que les cellules mort
 
 7. Remarques techniques
 
-Un message tel que “vertical sync not supported” peut apparaître sur certaines machines virtuelles ; il n’empêche pas l’exécution du programme.
+Un message tel que “vertical sync not supported” apparaît sur notre machines virtuelles, il n’empêche pas l’exécution du programme.
 
 L’affichage graphique varie selon la taille de la grille et du zoom appliqué.
 
