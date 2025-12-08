@@ -105,7 +105,7 @@ La classe Cellule, qui représente une cellule individuelle.
 
 L’interface EtatCellule, permettant de définir les comportements des cellules.
 
-Les classes EtatVivant et EtatMort, dérivées de CellState.
+Les classes EtatVivant et EtatMort, dérivées de EtatCellule.
 
 L’interface Regle, représentant le calcul d’évolution.
 
